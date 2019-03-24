@@ -57,7 +57,6 @@
   with_fileglob:
     - "{{ grafana_dashboards_dir }}/*.json"
   register: _dashboards_copied
-  notify: "provisioned dashboards changed"
   when: grafana_provision_dashboards
 
 - name: (dashboard sync) Get dashboard lists
