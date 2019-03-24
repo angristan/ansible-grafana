@@ -23,7 +23,7 @@ grafana_ini_options:
 
 See the [documentation](http://docs.grafana.org/installation/configuration/) for more information.
 
-### Privisionning
+### Provisionning
 
 There are ansible modules to add datasources and dashboards, but it is more practical to use file [provisionning](http://docs.grafana.org/administration/provisioning/).
 
