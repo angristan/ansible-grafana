@@ -1,0 +1,12 @@
+---
+
+- name: Set options in grafana.ini
+  ini_file:
+    path: /etc/grafana/grafana.ini
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    state: "{{ item.state | default('present') }}"
+  with_items: "{{ grafana_ini_options }}"
+  notify: restart grafana
+  tags: grafana.options

@@ -1,0 +1,19 @@
+---
+
+- include: install.yml
+  tags:
+    - prometheus.install
+
+- include: configure.yml
+  tags:
+    - prometheus.configure
+
+- include: provisioning.yml
+  tags:
+    - prometheus.provisioning
+
+- name: Enable and start Grafana service
+  systemd:
+    name: grafana-server
+    state: started
+    enabled: true

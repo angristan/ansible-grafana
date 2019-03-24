@@ -1,0 +1,10 @@
+---
+
+grafana_ini_options:
+  - {section: server, option: http_addr, value: 127.0.0.1}
+
+grafana_provision_dashboards: false
+grafana_provisioning_synced: false
+grafana_dashboards_dir: grafana/dashboards
+
+

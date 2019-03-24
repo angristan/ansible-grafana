@@ -1,0 +1,74 @@
+---
+
+- name: Add datasource provisioning file
+  copy:
+    dest: "/etc/grafana/provisioning/datasources/ansible.yml"
+    content: |
+      apiVersion: 1
+      deleteDatasources: []
+      datasources:
+      {{ grafana_datasources | to_nice_yaml }}
+    owner: grafana
+    group: grafana
+    mode: 0640
+  notify: restart grafana
+  when: grafana_datasources is not undefined
+
+- name: Add dashboards provisioning file
+  copy:
+    dest: "/etc/grafana/provisioning/dashboards/ansible.yml"
+    content: |
+        apiVersion: 1
+        providers:
+          - name: 'default'
+            orgId: 1
+            folder: ''
+            type: file
+            options:
+              path: /var/lib/grafana/dashboards
+    owner: grafana
+    group: grafana
+    mode: 0640
+  notify: restart grafana
+  when: grafana_provision_dashboards
+
+- name: Create dashboard provisioning folder
+  file:
+    path: "/var/lib/grafana/dashboards"
+    state: directory
+    mode: 0755
+    owner: grafana
+    group: grafana
+  when: grafana_provision_dashboards
+
+- name: (dashboard sync) Register previously copied dashboards
+  find:
+    paths: "/var/lib/grafana/dashboards"
+    hidden: true
+    patterns:
+        - "*.json"
+  register: _dashboards_present
+  when: grafana_provisioning_synced and grafana_provision_dashboards
+
+- name: Import grafana dashboards
+  copy:
+    src: "{{ item }}"
+    dest: "/var/lib/grafana/dashboards/{{ item | basename }}"
+  with_fileglob:
+    - "{{ grafana_dashboards_dir }}/*.json"
+  register: _dashboards_copied
+  notify: "provisioned dashboards changed"
+  when: grafana_provision_dashboards
+
+- name: (dashboard sync) Get dashboard lists
+  set_fact:
+    _dashboards_present_list: "{{ _dashboards_present | json_query('files[*].path') | default([]) }}"
+    _dashboards_copied_list: "{{ _dashboards_copied | json_query('results[*].dest') | default([]) }}"
+  when: grafana_provisioning_synced and grafana_provision_dashboards
+
+- name: (dashboard sync) Remove dashbards not present on target machine
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items: "{{ _dashboards_present_list | difference( _dashboards_copied_list ) }}"
+  when: grafana_provisioning_synced and grafana_provision_dashboards
