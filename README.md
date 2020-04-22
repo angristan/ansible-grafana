@@ -1,7 +1,5 @@
 # Ansible role for Grafana
 
-[![CircleCI](https://circleci.com/gh/angristan/ansible-grafana.svg?style=svg)](https://circleci.com/gh/angristan/ansible-grafana)
-
 This role will setup [Grafana](https://github.com/grafana/grafana/) on Debian/Ubuntu based hosts.
 
 ## Role Variables
