@@ -1,14 +1,29 @@
 ---
 
+- name: Ensure Grafana APT keyring directory exists
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
 - name: Add Grafana APT key
   apt_key:
-    url: https://packages.grafana.com/gpg.key
+    url: https://apt.grafana.com/gpg.key
+    keyring: /etc/apt/keyrings/grafana.gpg
+
+- name: Remove stale Grafana APT repo with ASCII keyring
+  lineinfile:
+    path: /etc/apt/sources.list.d/grafana.list
+    search_string: "deb [signed-by=/etc/apt/keyrings/grafana.asc] https://apt.grafana.com stable main"
+    state: absent
 
 - name: Add Grafana APT repo
   apt_repository:
-    repo: "deb https://packages.grafana.com/oss/deb stable main"
+    repo: "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main"
     filename: grafana
+    update_cache: true
 
 - name: Install Grafana
   apt:
-    name: grafana
+    name: "grafana={{ grafana_version }}"
+  notify: restart grafana
